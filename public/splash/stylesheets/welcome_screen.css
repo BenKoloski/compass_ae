@@ -1,0 +1,77 @@
+#background {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    z-index: -1; /* Ensure div tag stays behind content; */
+}
+
+.stretch {
+    width:100%;
+    height:100%;
+}
+
+.brand.row {
+    margin-top: 40px;
+}
+
+.header.row {
+      margin-top: 10px;
+  }
+
+.video.row img {
+    margin: 20px 0px 0px 40px;
+}
+
+h1, h2, h3, h4, p {
+    color: white;
+    text-align: center;
+}
+.header h1, .header h2{
+  font-weight: 100;
+}
+
+.header h2 {
+    font-size: 1.2em;
+}
+
+.links.row {
+    margin-top: 40px;
+}
+.buttons.row {
+    margin-top: 10px;
+}
+
+.links.row img{
+    padding-left: 50%;
+    margin-left: -32px;
+}
+
+.links h4 {
+    font-size: 1.1em;
+    font-weight: 400;
+    color: #13b3d5;
+    margin-bottom: 20px;
+}
+.links p {
+    font-size: 1em;
+    font-weight: 200;
+}
+.centered
+{
+    text-align:center;
+}
+.links .btn-primary {
+    margin-top: 20px;
+}
+.btn-primary {
+   background-color: transparent;
+   color: #13b3d5;
+   width: 120px;
+   border: 2px solid;
+}
+.btn-primary:hover
+{
+    background-color: #13b3d5;
+}
