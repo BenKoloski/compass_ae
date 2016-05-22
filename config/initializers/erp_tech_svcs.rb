@@ -1,5 +1,8 @@
 Rails.application.config.erp_tech_svcs.configure do |config|
-  config.installation_domain = 'showcase.mycompassagile.com'
-  config.file_protocol = 'http'
+  config.file_storage = :filesystem # Can be either :s3 or :filesystem
+  config.installation_domain = 'benkoloski.mycompassagile.com'
+  config.file_protocol = 'https'
+  config.email_notifications_from = 'noreply@mycompassagile.com'
 end
 Rails.application.config.erp_tech_svcs.configure!
+
