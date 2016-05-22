@@ -11,9 +11,9 @@ set :password, 'c0mp@33'
 set :delayed_job_args, "-n 1"
 set :delayed_job_bin_path, 'script'
 
-role :app, %w{SERVER_NAME}
-role :web, %w{SERVER_NAME}
-role :db,  %w{SERVER_NAME}
+role :app, %w{benkoloski.mycompassagile.com}
+role :web, %w{benkoloski.mycompassagile.com}
+role :db,  %w{benkoloski.mycompassagile.com}
 
 # Extended Server Syntax
 # ======================
@@ -21,7 +21,7 @@ role :db,  %w{SERVER_NAME}
 # server list. The second argument is a, or duck-types, Hash and is
 # used to set extended properties on the server.
 
-server 'SERVER_NAME', user: 'compass_ae', port: 22, password: fetch(:password), roles: %w{web app db}
+server 'benkoloski.mycompassagile.com', user: 'compass_ae', port: 22, password: fetch(:password), roles: %w{web app db}
 
 set :deploy_to, '/var/www/production'
 

@@ -5,7 +5,7 @@ set :rvm_type, :user
 set :rvm_ruby_version, 'ruby-2.1.5@compass_ae'
 set :delayed_job_bin_path, 'script'
 
-set :application, 'APP_NAME'
+set :application, 'benkoloski'
 set :repo_url, "/home/compass_ae/repo/compass_ae.git"
 
 # Default branch is :master
