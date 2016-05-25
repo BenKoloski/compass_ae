@@ -6,7 +6,7 @@ Compass.ErpApp.Widgets.AppointmentCalendar = {
 
 Compass.ErpApp.Widgets.AvailableWidgets.push({
     name:'Appointment Calendar',
-    iconUrl:'icon.jpg',
+    iconUrl:'/assets/icons/product/product_48x48.png',
     onClick:Compass.ErpApp.Widgets.AppointmentCalendar.addWidget,
     about:"Appointment Calendar"
 });
