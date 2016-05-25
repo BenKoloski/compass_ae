@@ -1,5 +1,5 @@
 <head>
-  <%= stylesheet_link_tag( 'erp_app/shared/plugins/fullcalendar/fullcalendar.css')  %>
+  <%= stylesheet_link_tag( '//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.7.2/fullcalendar.min.css')  %>
 </head>
 
 <div id="calendar"></div>
@@ -24,8 +24,8 @@
   </div>
 </div>
 
-<%= javascript_include_tag( 'erp_app/shared/plugins/fullcalendar/lib/moment.min.js') %>
-<%= javascript_include_tag( 'erp_app/shared/plugins/fullcalendar/fullcalendar.min.js') %>
+<%= javascript_include_tag( '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js') %>
+<%= javascript_include_tag( '//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.7.2/fullcalendar.min.js') %>
 <script type="text/javascript">
   $('#createEventModal').modal({ show: false})
   var lastTimeClicked = null;
