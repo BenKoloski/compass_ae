@@ -1,0 +1,192 @@
+<head>
+  <%= stylesheet_link_tag( 'erp_app/shared/plugins/fullcalendar/fullcalendar.css')  %>
+</head>
+
+<div id="calendar"></div>
+
+<!-- Modal -->
+<div id="createEventModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Make an appointment</h4>
+      </div>
+      <div class="modal-body">
+        <p>Make an appointment for <span id="timeClicked"></span>?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" id="createEventButton" data-dismiss="modal">Submit</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= javascript_include_tag( 'erp_app/shared/plugins/fullcalendar/lib/moment.min.js') %>
+<%= javascript_include_tag( 'erp_app/shared/plugins/fullcalendar/fullcalendar.min.js') %>
+<script type="text/javascript">
+  $('#createEventModal').modal({ show: false})
+  var lastTimeClicked = null;
+
+  $("#calendar").fullCalendar({
+    header: {
+      left: 'today, prev,next',
+      center: 'title',
+      right: 'month,agendaWeek,agendaDay'
+    },
+
+    displayEventEnd: true,
+
+    viewRender: function () {
+      $('#calendar').fullCalendar('refetchEvents');
+    },
+
+    eventRender: function (event, element) {
+      return events[event.id]._render(element);
+    },
+
+    dayClick: function (date, event, view) {
+      if (view.name === 'month') {
+        $('#calendar').fullCalendar('gotoDate', date);
+        $('#calendar').fullCalendar('changeView', 'agendaDay');
+      }
+      lastTimeClicked = date;
+    },
+
+    events: function (start, end, timezone, callback) {
+      jQuery.ajax({
+        url: "<%= build_widget_url(:get_events) %>",
+        success: function (response) {
+          var events = [];
+          var availabilitySlots = response.availability_slots;
+          var myAppointments    = response.my_appointments;
+          var notMyAppointments = response.not_my_appointments;
+
+          jQuery.each(availabilitySlots, function () {
+            var slot = new Availability(this);
+            events.push(slot.buildEvent());
+          });
+
+          jQuery.each(notMyAppointments, function () {
+            var appointment = new NotMyAppointment(this);
+            events.push(appointment.buildEvent());
+          });
+
+          jQuery.each(myAppointments, function () {
+            var appointment = new myAppointment(this);
+            events.push(appointment.buildEvent());
+          });
+
+          callback(events);
+        }
+      });
+    }
+  });
+
+  $("#calendar").on("click",".fc-bgevent", function(event) {
+    $('#timeClicked').empty().append(lastTimeClicked.format('h:mm A') + ' - ' + lastTimeClicked.add(30, 'm').format('h:mm A'));
+    $('#createEventModal').modal('show');
+  });
+
+  $("#createEventButton").click(function () {    
+    var start = lastTimeClicked.utc().format();
+    var end   = lastTimeClicked.add(30, 'm').utc().format();
+
+    // console.log(start);
+    // $.post("<%= build_widget_url(:create_event) %>", 
+    //   {
+    //     start: start,
+    //     end: end,
+    //     authenticityToken: "<%= form_authenticity_token %>"
+    //   },
+    //   function (response) {
+    //     $("#calendar").fullCalendar('refetchEvents');
+    //   });
+  });
+
+  var events = {};
+
+  class Event {
+    constructor (args) {
+      this.id    = args.id
+      this.title = args.title;
+      this.start = moment(args.starttime);
+      this.end   = moment(args.endtime);
+
+      events[this.id] = this;
+    }
+
+          // template method
+          click () {}
+
+          // template method
+          render (element) { return element; }
+
+          // utility to get name of current view
+          static getView () {
+            return $('#calendar').fullCalendar('getView').name;
+          }
+
+          // executes [view]Render() if defined, or executes render()
+          _render (element) {
+            this[Event.getView() + 'Render'] && this[Event.getView() + 'Render'](element) ||
+            this.render(element)
+          }
+
+          // merges view-specific options => instance-specific options => "this" object to build an event object for full calendar
+          buildEvent () {
+            var opts = this.eventOptions && this.eventOptions() || {};
+            var viewSpecificOpts = this[Event.getView() + 'EventOptions'] && this[Event.getView() + 'EventOptions']() || {};
+            return Object.assign(this, Object.assign(opts, viewSpecificOpts));
+          }
+        }
+
+        class Availability extends Event {
+          constructor (args) {
+            super(args);
+          }
+
+          render (element) {
+            return element.append(this.title);
+          }
+
+          monthRender (element) {
+            return element;
+          }
+
+          eventOptions () {
+            return { rendering: 'background' }
+          }
+
+          monthEventOptions () {
+            return { allDay: true }
+          }
+        }
+
+        class Appointment extends Event {
+          constructor (args) {
+            super(args);
+          }
+        }
+
+        class NotMyAppointment extends Appointment {
+          constructor (args) {
+            super(args);
+            this.title = "Reserved time";
+          }
+
+          eventOptions () {
+            return { backgroundColor: 'gray' }
+          }
+        }
+
+        class MyAppointment extends Appointment {
+          constructor (args) {
+            super(args);
+            this.title = "YOUR APPOINTMENT";
+          }
+        }
+
+      </script>
