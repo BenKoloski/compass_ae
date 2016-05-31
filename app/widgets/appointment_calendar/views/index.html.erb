@@ -94,25 +94,20 @@
   });
 
   $("#createEventButton").click(function () { 
-    console.log(lastTimeClicked);
     var start = lastTimeClicked.add(-(moment().utcOffset()), 'm');
     var startArr = [start.year(), start.month() + 1, start.date(), start.hour(), start.minute()];
-    console.log(startArr);
-
     var end = new moment(start);
-
-    var end   = start.add(30, 'm');
     var endArr = [end.year(), end.month() + 1, end.date(), end.hour(), end.minute()];
 
     $.post("<%= build_widget_url(:create_event) %>", 
-      {
-        start: startArr,
-        end: endArr,
-        authenticity_token: "<%= form_authenticity_token %>"
-      },
-      function (response) {
-        $("#calendar").fullCalendar('refetchEvents');
-      });
+    {
+      start: startArr,
+      end: endArr,
+      authenticity_token: "<%= form_authenticity_token %>"
+    },
+    function (response) {
+      $("#calendar").fullCalendar('refetchEvents');
+    });
   });
 
   var events = {};

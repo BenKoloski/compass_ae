@@ -13,12 +13,12 @@ module Widgets
           party_id     = User.find(current_user).party.id
           role_type_id = RoleType.find_by_internal_identifier('appointment_requester').id
 
-          appointments    = CalendarEvent.appointments.joins(cal_evt_party_roles: :role_type)
+          appointments    = Appointment.joins(cal_evt_party_roles: :role_type)
           my_appointments = appointments.where(cal_evt_party_roles: {party_id: party_id, role_type_id: role_type_id})
           not_my_appointments = appointments - my_appointments
         end
 
-        availability_slots = CalendarEvent.availability_slots
+        availability_slots = AvailabilitySlot.all
 
         return :json => { 
           success: true,

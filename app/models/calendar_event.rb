@@ -1,5 +1,15 @@
 class CalendarEvent < ActiveRecord::Base
 	belongs_to :calendar_event_type
-	scope :availability_slots, -> { where('calendar_event_type_id = ?', CalendarEventType.find_by_internal_identifier('cal_availability').id)}
-  	scope :appointments, -> { where('calendar_event_type_id = ?', CalendarEventType.find_by_internal_identifier('cal_appointment').id)}
+
+	def to_date_range 
+		[starttime, endtime]
+	end
+
+	def created_by_party
+		Party.first
+	end
+
+	def updated_by_party
+		Party.first
+	end
 end
