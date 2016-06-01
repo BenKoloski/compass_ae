@@ -26,6 +26,18 @@ module CompassAeBusinessSuite
           end
         end
 
+                def update_appointment_requester(record, field_value)
+          cepr = record.cal_evt_party_roles.where(role_type_id: RoleType.iid('appointment_requester').id).first
+          cepr.party_id = field_value
+          cepr.save
+        end
+
+        def update_service_provider(record, field_value)
+          cepr = record.cal_evt_party_roles.where(role_type_id: RoleType.iid('service_provider').id).first
+          cepr.party_id = field_value
+          cepr.save
+        end
+
         def scope_by_party(parent_record, parent_business_module, exclude_associated_records, statement)
           CalendarEvent.joins(:cal_evt_party_roles).where(cal_evt_party_roles: {party_id: parent_record.id})
         end
