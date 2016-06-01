@@ -26,14 +26,16 @@ module CompassAeBusinessSuite
           end
         end
 
-                def update_appointment_requester(record, field_value)
+          def update_appointment_requester(record, field_value)
           cepr = record.cal_evt_party_roles.where(role_type_id: RoleType.iid('appointment_requester').id).first
+          cepr ||= CalEvtPartyRole.new role_type_id: RoleType.iid('appointment_requester').id, calendar_event_id: record.id
           cepr.party_id = field_value
           cepr.save
         end
 
         def update_service_provider(record, field_value)
           cepr = record.cal_evt_party_roles.where(role_type_id: RoleType.iid('service_provider').id).first
+          cepr ||= CalEvtPartyRole.new role_type_id: RoleType.iid('service_provider').id, calendar_event_id: record.id
           cepr.party_id = field_value
           cepr.save
         end
