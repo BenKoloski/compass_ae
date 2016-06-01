@@ -1,6 +1,7 @@
 class CalendarEvent < ActiveRecord::Base
 	belongs_to :calendar_event_type
-
+	has_many :cal_evt_party_roles 
+	
 	def to_date_range 
 		[starttime, endtime]
 	end
