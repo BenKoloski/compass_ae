@@ -1,7 +1,5 @@
 class AvailabilitySlot < CalendarEvent
 	has_many :appointments, class_name: 'Appointment', foreign_key: 'parent_id'
-		has_many :cal_evt_party_roles 
-
 
 	def self.get_availabilities start_time, end_time
 		times = []
