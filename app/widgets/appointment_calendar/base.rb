@@ -3,6 +3,7 @@ module Widgets
     class Base < ErpApp::Widgets::Base
 
       def index
+        @current_user = current_user
         render :view => :index
       end
 
@@ -14,9 +15,13 @@ module Widgets
           role_type_id = RoleType.find_by_internal_identifier('appointment_requester').id
 
           appointments    = Appointment.joins(cal_evt_party_roles: :role_type)
-          my_appointments = appointments.where(cal_evt_party_roles: {party_id: party_id, role_type_id: role_type_id})
-          not_my_appointments = appointments - my_appointments
+          my_appointments = appointments.where(cal_evt_party_roles: {party_id: party_id}).uniq
+          not_my_appointments = (appointments - my_appointments).uniq
+        else
+          not_my_appointments = Appointment.all
         end
+
+        
 
         availability_slots = AvailabilitySlot.all
 
@@ -28,8 +33,13 @@ module Widgets
         }
       end
 
+      def unschedule_event
+        CalendarEvent.find(params[:id]).destroy
+        return :json => {success: true}
+      end
+
       def create_event
-        event = CalendarEvent.new
+        event = Appointment.new
         params[:start] = params[:start].map {|el| el.to_i}
         params[:end] = params[:end].map {|el| el.to_i}
         event.starttime = DateTime.new params[:start][0], params[:start][1], params[:start][2], params[:start][3], params[:start][4]
@@ -38,7 +48,7 @@ module Widgets
 
         cepr = CalEvtPartyRole.new
         cepr.party_id = User.find(current_user).party.id
-        cepr.role_type_id = RoleType.find_by_internal_identifier('appointment_requester').id
+        cepr.role_type_id = RoleType.iid('appointment_requester').id
         cepr.calendar_event = event
 
         event.save

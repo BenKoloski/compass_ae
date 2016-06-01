@@ -6,6 +6,17 @@ module CompassAeBusinessSuite
 
       class CalendarEvents < Base
 
+        def after_create record
+          event_type = CalendarEventType.iid(business_module.meta_data['calendar_event_type'])
+          record.calendar_event_type = event_type
+          if (event_type.internal_identifier == 'cal_appointment')
+            record.type = 'Appointment'
+          elsif (event_type.internal_identifier == 'cal_availability')
+            record.type = 'AvailabilitySlot'
+          end
+          record.save!
+        end
+
       	class << self
           def default_name
             {
@@ -15,25 +26,34 @@ module CompassAeBusinessSuite
           end
         end
 
-        # def search filters, exclude_associated_records
-        #   Appointment.where(true)
-        # end
+        def scope_by_party(parent_record, parent_business_module, exclude_associated_records, statement)
+          CalendarEvent.joins(:cal_evt_party_roles).where(cal_evt_party_roles: {party_id: parent_record.id})
+        end
+
+        def search filters, exclude_associated_records
+          klass = nil
+          if business_module.meta_data['calendar_event_type'] == 'cal_appointment'
+            klass = Appointment
+          elsif business_module.meta_data['calendar_event_type'] == 'cal_availability'
+            klass= AvailabilitySlot
+          end
+          klass
+        end
 
         def show_appointment_requester(record, field, fields_hash)
-        	list_role_type(:appointment_requester, record)
+          Party.joins(:cal_evt_party_roles).where(cal_evt_party_roles: {calendar_event_id: record.id, role_type_id: RoleType.iid('appointment_requester').id}).first
         end
 
         def show_service_provider(record, field, fields_hash)
-        	list_role_type(:service_provider, record)
+          Party.joins(:cal_evt_party_roles).where(cal_evt_party_roles: {calendar_event_id: record.id, role_type_id: RoleType.iid('service_provider').id}).first
         end
 
         def list_appointment_requester(record, field, fields_hash)
-          list_role_type(:appointment_requester, record)
-          'asdf'
+          Party.joins(:cal_evt_party_roles).where(cal_evt_party_roles: {calendar_event_id: record.id, role_type_id: RoleType.iid('appointment_requester').id}).first
         end
 
         def list_service_provider(record, field, fields_hash)
-          list_role_type(:service_provider, record)
+          Party.joins(:cal_evt_party_roles).where(cal_evt_party_roles: {calendar_event_id: record.id, role_type_id: RoleType.iid('service_provider').id}).first
         end
 
         def create_appointment_requester(record, field_value)
@@ -50,20 +70,6 @@ module CompassAeBusinessSuite
           cepr.role_type_id = RoleType.iid('service_provider').id
           cepr.party_id = field_value
           cepr.save
-        end
-
-        def list_role_type(role_type, record)
-          name  = self.class.default_name[role_type.to_sym]
-          roles = record.cal_evt_party_roles
-
-          if roles.first
-            role = roles.where(role_type_id: RoleType.iid(role_type).id)
-            if role.first
-              name = role.first.party.description
-            end
-          end
-
-          name
         end
       	
       end # CalendarEvents

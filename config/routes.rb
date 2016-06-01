@@ -1,6 +1,12 @@
 DemoApp::Application.routes.draw do
   #mount CompassAE engines
   ErpBaseErpSvcs.mount_compass_ae_engines(self)
+
+  namespace :api do
+    namespace :v1 do
+      resources :calendar_event_types, :defaults => {:format => 'json'}
+    end
+  end
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

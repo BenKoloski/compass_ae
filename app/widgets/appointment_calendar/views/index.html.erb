@@ -1,5 +1,10 @@
 <head>
   <%= stylesheet_link_tag( '//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.7.2/fullcalendar.min.css')  %>
+  <style>
+  .fc-ltr .fc-time-grid .fc-event-container {
+    margin: 0;
+  }
+  </style>
 </head>
 
 <div id="calendar"></div>
@@ -18,6 +23,61 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" id="createEventButton" data-dismiss="modal">Submit</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="loginModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Make an appointment</h4>
+      </div>
+      <div class="modal-body">
+        <p>You must <a href='/login'>log in</a> to create an appointment. </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="notYourAppointment" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Reserved time</h4>
+      </div>
+      <div class="modal-body">
+        <p>Click a green area on the calendar to reserve an appointment for that time.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="yourAppointment" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Your appointment</h4>
+      </div>
+      <div class="modal-body">
+        <p>This is your reserved appointment.</p>
+      </div>
+      <div class="modal-footer">
+        <button id="unschedule" type="button" class="btn btn-default" data-event-id data-dismiss="modal">Unschedule</button>
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div>
@@ -43,6 +103,10 @@
       $('#calendar').fullCalendar('refetchEvents');
     },
 
+    eventClick: function (event) {
+      events[event.id].click()
+    },
+
     eventRender: function (event, element) {
       return events[event.id]._render(element);
     },
@@ -59,6 +123,8 @@
       jQuery.ajax({
         url: "<%= build_widget_url(:get_events) %>",
         success: function (response) {
+
+          console.log(response);
           var events = [];
           var availabilitySlots = response.availability_slots;
           var myAppointments    = response.my_appointments;
@@ -79,8 +145,6 @@
             events.push(appointment.buildEvent());
           });
 
-          console.log(events);
-
           callback(events);
         }
       });
@@ -90,13 +154,17 @@
   $("#calendar").on("click",".fc-bgevent", function(event) {
     var end = new moment(lastTimeClicked);
     $('#timeClicked').empty().append(lastTimeClicked.format('h:mm A') + ' - ' + end.add(30, 'm').format('h:mm A'));
-    $('#createEventModal').modal('show');
+    if (<%= !!@current_user %>) {
+      $('#createEventModal').modal('show');
+    } else {
+      $('#loginModal').modal('show');
+    }
   });
 
   $("#createEventButton").click(function () { 
     var start = lastTimeClicked.add(-(moment().utcOffset()), 'm');
     var startArr = [start.year(), start.month() + 1, start.date(), start.hour(), start.minute()];
-    var end = new moment(start);
+    var end = new moment(start).add(30, 'm');
     var endArr = [end.year(), end.month() + 1, end.date(), end.hour(), end.minute()];
 
     $.post("<%= build_widget_url(:create_event) %>", 
@@ -109,6 +177,17 @@
       $("#calendar").fullCalendar('refetchEvents');
     });
   });
+
+  $("#unschedule").click(function () {
+    $.post("<%= build_widget_url(:unschedule_event) %>", 
+    {
+      id: $(this).attr('data-event-id'),
+      authenticity_token: "<%= form_authenticity_token %>"
+    },
+    function (response) {
+      $("#calendar").fullCalendar('refetchEvents');
+    });
+  })
 
   var events = {};
 
@@ -184,12 +263,25 @@
           eventOptions () {
             return { backgroundColor: 'gray' }
           }
+
+          click () {
+            if (<%= !!@current_user %>){
+              $("#notYourAppointment").modal('show');
+            } else {
+              $("#loginModal").modal('show');
+            }
+          }
         }
 
         class MyAppointment extends Appointment {
           constructor (args) {
             super(args);
             this.title = "YOUR APPOINTMENT";
+          }
+
+          click () {
+            $("#unschedule").attr('data-event-id', this.id)
+            $("#yourAppointment").modal('show');
           }
         }
 
